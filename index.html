@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Optimal Delivery Route System</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <script type="module" src="./index.js"></script>
+  </head>
+  <body>
+    <h1>Google Map</h1>
+    <script src="script.js"></script>
+    <div id="map"></div>
+    <h2>Enter Locations</h2>
+    <div className="App">
+        <form onSubmit={handleAddLocation}>
+          <label>
+            Delivery Location:
+            <input type="text" name="address" required />
+          </label>
+          <button type="submit">Add Location</button>
+        </form>
+        
+        
+        <h2>Delivery Locations:</h2>
+        <ul id="deliveryLocations">
+            
+           </ul>
+        <button type="button" onclick="handleSubmit()">Optimize Route</button>
+        <script>
+            function handleSubmit() {
+             var deliveryLocationsList = document.getElementById('deliveryLocations');
+             var deliveryLocations = Array.from(deliveryLocationsList.getElementsByTagName('li')).map(function(item) {
+                return item.textContent;
+             });
+            }
+        </script>
+    </div>
+    <!-- <form id="location-form">
+        <label for="latitude">Latitude:</label>
+        <input type="text" id="latitude" name="latitude" required />
+        <label for="longitude">Longitude:</label>
+        <input type="text" id="longitude" name="longitude" required />
+        <button type="submit">Add Location</button>
+      </form> -->
+    <script>
+        function initMap(){
+            var options = {
+                // zoom:4,
+                // center:{lat:42.3601,lng:-71.0589}
+            }
+            
+            var map= new google.maps.map(document.getElementById('map'),options);
+        }
+    </script>
+
+    <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+        ({key: "AIzaSyCaWMTzyu3Whc_NtMtz7ol30tr328A3scM", v: "weekly"});</script>
+  </body>
+</html> 
