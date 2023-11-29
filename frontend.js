@@ -43,6 +43,18 @@ function App() {
         </ul>
         <button type="submit">Optimize Route</button>
       </form>
+
+      <form onSubmit={handleSelectAlgorithm}>
+        <label>
+          Select an Algroithm:
+        </label>
+        <select id="algorithm" name="algorithm">
+          <option value="TSP">TSP</option>
+          <option value="Brute Force">Brute Force</option>
+          <option value="Nearest Neighbors">Nearest Neighbors</option>
+        </select>
+        <button type="submit">Select an Algorithm: </button>
+      </form>
     </div>
  );
 }
