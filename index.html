@@ -37,6 +37,20 @@
             }
         </script>
     </div>
+
+    <!-- Adding UI for selecting Algorithms-->
+    <h2>Select Algorithm:</h2>
+    <div className="App">
+        <form onSubmit={handleSelectAlgorithm}>
+          <label for = "algorithm"> Select an Algorithm: </label>
+          <select id="algorithm" name="algorithm">
+            <option value="TSP">TSP</option>
+            <option value="Brute Force">Brute Force</option>
+            <option value="Nearest Neighbors">Nearest Neighbors</option>
+          </select>
+          <button type="submit">Select an Algorithm: </button>
+        </form>
+    </div>
     <!-- <form id="location-form">
         <label for="latitude">Latitude:</label>
         <input type="text" id="latitude" name="latitude" required />
