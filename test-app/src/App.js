@@ -1,5 +1,6 @@
 import "./App.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef} from "react";
+import {solveTSPNearest} from "./routing_algorithms";
 
 import {
   Box,
@@ -13,6 +14,7 @@ import {
   Input,
   SkeletonText,
   Text,
+  Select,
 } from "@chakra-ui/react";
 
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete, Polyline, DirectionsService, InfoWindow } from '@react-google-maps/api';
@@ -25,10 +27,19 @@ const containerStyle = {
     height: '100%'
     
 };
+
 const center = {
   lat: 33.8704,
   lng: -117.9242
 };
+
+const smallPadding = {
+  padding: "10px 0px 10px 0px",
+}
+
+const smallMargin = {
+  margin: "10px 0px 10px 0px",
+}
 
 const libraries = ["places"];
 
@@ -42,10 +53,13 @@ const OptimalDeliveryRouteSystem = () => {
   const [isValidInput, setIsValidInput] = useState(true); 
   const [cities, setCities] = useState([]);
   const [tourPath, setTourPath] = useState([]);
-  const [totalDistance, setTotalDistance] = useState([]);
+  var [totalDistance, setTotalDistance] = useState([]);
   const [directions, setDirections] = useState([]);
   const [markersWithLabels, setMarkersWithLabels] = useState([]);
   const [selectedMarker, setSelectedMarker] = useState(null);
+  var tour = [];
+  const selectAlgoRef = useRef();
+  var selectedAlgo = null;
 
   useEffect(() => {
     if (markers.length > 0) {
@@ -93,7 +107,11 @@ const OptimalDeliveryRouteSystem = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
+    const handleSelectAlgorithm = () => {
+      selectedAlgo = selectAlgoRef.current.value;
+    }
+
     const calculateDistances = async () => {
   
       const distances = [];
@@ -125,53 +143,16 @@ const OptimalDeliveryRouteSystem = () => {
       console.log('Distance Matrix:', distances);
       // Use the generated distance matrix for further processing
       // For instance, you can update state or perform additional operations
-      const solveTSPNearest = (distances) => {
-        const numCities = distances.length;
-        const visited = new Array(numCities).fill(false);
-        const tour = [];
-        let totalDistance = 0;
   
-        // Start at the first city
-        let currentCity = 0;
-        tour.push(currentCity);
-        visited[currentCity] = true;
-  
-        // Repeat until all cities have been visited
-        while (tour.length < numCities) {
-          let nearestCity = null;
-          let nearestDistance = Infinity;
-  
-          // Find the nearest unvisited city
-          for (let city = 0; city < numCities; city++) {
-            if (!visited[city] && distances[currentCity][city] !== undefined) {
-              const distance = distances[currentCity][city];
-              if (distance < nearestDistance) {
-                nearestCity = city;
-                nearestDistance = distance;
-              }
-            }
-          }
-  
-          // Move to the nearest city
-          if (nearestCity !== null) {
-            currentCity = nearestCity;
-            tour.push(currentCity);
-            visited[currentCity] = true;
-            totalDistance += nearestDistance;
-          } else {
-            // Handle the case where there's no valid nearest city
-            break;
-          }
-        }
-  
-        // Complete the tour by returning to the starting city
-        tour.push(0);
-        totalDistance += distances[currentCity][0] !== undefined ? distances[currentCity][0] : 0;
-  
-        return { tour, totalDistance };
-      };
-  
-      const { tour, totalDistance } = solveTSPNearest(distances);
+
+      handleSelectAlgorithm();
+      if (selectedAlgo === "TSP"){
+        ({ tour, totalDistance } = solveTSPNearest(distances));
+      }else if (selectedAlgo === "Brute Force"){
+        ({ tour, totalDistance } = solveTSPNearest(distances));
+      }else if(selectedAlgo === "Nearest Neighbor"){
+        ({ tour, totalDistance } = solveTSPNearest(distances));
+      }
       setTourPath(tour);
       setTotalDistance(totalDistance);
       console.log("Tour:", tour);
@@ -280,10 +261,10 @@ const OptimalDeliveryRouteSystem = () => {
   return (
     <div>
       <div className="mainapp">
-        <div className="locations">
+        <div className="locations" style={smallMargin}>
             <Text fontSize="xl" fontWeight="bold">Enter Locations:</Text>
           <form onSubmit={handleAddLocation}>
-            <FormControl>
+            <FormControl style={smallPadding}>
               <FormLabel>Delivery Location:</FormLabel>
               <Autocomplete onLoad={(autocomplete) => setAutocomplete(autocomplete)}
                 onPlaceChanged={handlePlaceChanged}>
@@ -301,20 +282,32 @@ const OptimalDeliveryRouteSystem = () => {
             </Button>
           </form>
       
-          <form onSubmit={handleSubmit}>
-            
+          <form style={smallPadding} onSubmit={handleSubmit}>
               <Text fontSize="xl" fontWeight="bold">Delivery Locations:</Text>
               <ul>
                 {deliveryLocations.map((location, index) => (
                   <li key={index}>{location}</li>
                 ))}
               </ul>
-            
-            <Flex>
+
+          </form>
+
+          <form onSubmit={handleSubmit} style={smallPadding} required>
+            <FormControl>
+              <FormLabel fontSize="xl" fontWeight="bold">Select an Algorithm:</FormLabel>
+              <Select ref = {selectAlgoRef} placeholder='Select an Algorithm: ' required>
+                <option value='TSP'>TSP</option>
+                <option value='Brute Force'>Brute Force</option>
+                <option value='Nearest Neighbors'>Nearest Neighbors</option>
+              </Select>
+            </FormControl>
+
+            <Flex style={smallPadding}>
               <Button colorScheme="blue" type="submit">Optimize Route</Button>
               <Button onClick={handleRefresh} colorScheme="red">Refresh Page</Button>
             </Flex>
           </form>
+
         </div>
         
         <div className="map">
