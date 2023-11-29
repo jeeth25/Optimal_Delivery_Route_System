@@ -1,6 +1,6 @@
 import "./App.css";
 import { useState, useEffect, useRef} from "react";
-import {solveTSPNearest} from "./routing_algorithms";
+import {solveTSPNearest, solveTSPBruteForce, solveTSPMST} from "./routing_algorithms";
 
 import {
   Box,
@@ -146,12 +146,12 @@ const OptimalDeliveryRouteSystem = () => {
   
 
       handleSelectAlgorithm();
-      if (selectedAlgo === "TSP"){
+      if (selectedAlgo === "TSP Nearest"){
         ({ tour, totalDistance } = solveTSPNearest(distances));
-      }else if (selectedAlgo === "Brute Force"){
-        ({ tour, totalDistance } = solveTSPNearest(distances));
-      }else if(selectedAlgo === "Nearest Neighbor"){
-        ({ tour, totalDistance } = solveTSPNearest(distances));
+      }else if (selectedAlgo === "TSP Brute Force"){
+        ({ tour, totalDistance } = solveTSPBruteForce(distances));
+      }else if(selectedAlgo === "TSPMST"){
+        ({ tour, totalDistance } = solveTSPMST(distances));
       }
       setTourPath(tour);
       setTotalDistance(totalDistance);
@@ -296,9 +296,9 @@ const OptimalDeliveryRouteSystem = () => {
             <FormControl>
               <FormLabel fontSize="xl" fontWeight="bold">Select an Algorithm:</FormLabel>
               <Select ref = {selectAlgoRef} placeholder='Select an Algorithm: ' required>
-                <option value='TSP'>TSP</option>
-                <option value='Brute Force'>Brute Force</option>
-                <option value='Nearest Neighbors'>Nearest Neighbors</option>
+                <option value='TSP Nearest'>TSP Nearest</option>
+                <option value='TSP Brute Force'>TSP Brute Force</option>
+                <option value='TSPMST'>TSPMST</option>
               </Select>
             </FormControl>
 
