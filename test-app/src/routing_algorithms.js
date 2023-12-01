@@ -46,11 +46,12 @@ export const solveTSPNearest = (distances) => {
    
   export function solveTSPBruteForce(distances) {
     const numCities = distances.length;
-    const allPermutations = generateAllPermutations(numCities);
+    const allPermutations = generateAllPermutations(numCities - 1); // Exclude the first city
     let minDistance = Infinity;
     let optimalTour;
 
-    for (const permutation of allPermutations) {
+    for (let permutation of allPermutations) {
+        permutation = [0, ...permutation.map(i => i + 1), 0]; // Add the first city at the beginning and the end
         const currentDistance = calculateTourDistance(permutation, distances);
         if (currentDistance < minDistance) {
             minDistance = currentDistance;
@@ -60,9 +61,25 @@ export const solveTSPNearest = (distances) => {
 
     return { tour: optimalTour, totalDistance: minDistance };
 }
+//   export function solveTSPBruteForce(distances) {
+//     const numCities = distances.length;
+//     const allPermutations = generateAllPermutations(numCities);
+//     let minDistance = Infinity;
+//     let optimalTour;
+
+//     for (const permutation of allPermutations) {
+//         const currentDistance = calculateTourDistance(permutation, distances);
+//         if (currentDistance < minDistance) {
+//             minDistance = currentDistance;
+//             optimalTour = permutation;
+//         }
+//     }
+
+//     return { tour: optimalTour, totalDistance: minDistance };
+// }
 
  export function solveTSPMST(distances) {
-    const numCities = distances.length;
+    // const numCities = distances.length;
 
     // Create a minimum spanning tree using Prim's algorithm
     const mst = primMST(distances);
