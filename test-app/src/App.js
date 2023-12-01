@@ -62,13 +62,16 @@ const OptimalDeliveryRouteSystem = () => {
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState("");
   const [animationIndex, setAnimationIndex] = useState("");
+  const [selectedDuration, setSelectedDuration] = useState("");
   const [executionTimes, setExecutionTimes] = useState({
     'TSP Nearest': 0,
     'TSP Brute Force': 0,
     'TSPMST': 0,
   });
+  
 
   var tour = [];
+  
   const selectAlgoRef = useRef();
   var selectedAlgo = null;
   const mapRef = useRef();
@@ -106,8 +109,8 @@ const OptimalDeliveryRouteSystem = () => {
 
     if (autocomplete !== null) {
       const place = autocomplete.getPlace();
-      console.log("Lat:", place.geometry.location.lat());
-      console.log("Lng:", place.geometry.location.lng());
+      // console.log("Lat:", place.geometry.location.lat());
+      // console.log("Lng:", place.geometry.location.lng());
       if (place && place.geometry && place.geometry.location) {
         const newMarkers = [
           ...markers,
@@ -132,6 +135,7 @@ const OptimalDeliveryRouteSystem = () => {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
+
 
     const handleSelectAlgorithm = () => {
       selectedAlgo = selectAlgoRef.current.value;
@@ -175,23 +179,59 @@ const OptimalDeliveryRouteSystem = () => {
 
       if (selectedAlgo === 'All') {
         const start1 = performance.now();
-        ({ tour, totalDistance } = solveTSPNearest(distances));
+        const { tour: tourNearest, totalDistance: totalDistanceNearest } = solveTSPNearest(distances);
         const end1 = performance.now();
-    
+      
         const start2 = performance.now();
-        ({ tour, totalDistance } = solveTSPBruteForce(distances));
+        const { tour: tourBruteForce, totalDistance: totalDistanceBruteForce } = solveTSPBruteForce(distances);
         const end2 = performance.now();
-    
+      
         const start3 = performance.now();
-        ({ tour, totalDistance } = solveTSPMST(distances));
+        const { tour: tourMST, totalDistance: totalDistanceMST } = solveTSPMST(distances);
         const end3 = performance.now();
-    
+      
+        // Store execution times for all algorithms
         setExecutionTimes({
           algorithm1: end1 - start1,
           algorithm2: end2 - start2,
           algorithm3: end3 - start3,
         });
-      } 
+      
+        // Store distances of all algorithms
+        const distancesArray = [
+          { tour: tourNearest, totalDistance: totalDistanceNearest },
+          { tour: tourBruteForce, totalDistance: totalDistanceBruteForce },
+          { tour: tourMST, totalDistance: totalDistanceMST },
+        ];
+        console.log("Distances Array:", distancesArray);
+        
+
+        // Find the shortest distance among the three algorithms
+        let shortestDistance = Infinity;
+        let shortestDistanceIndex = -1;
+        
+        distancesArray.forEach((result, index) => {
+          if (result.totalDistance < shortestDistance) {
+            shortestDistance = result.totalDistance;
+            shortestDistanceIndex = index;
+          }
+        });
+
+        
+
+        if (shortestDistanceIndex !== -1)
+        {
+            // const { tour, totalDistance } = distancesArray[shortestDistanceIndex];
+            const { tour: shortestTour, totalDistance: shortestTotalDistance } = distancesArray[shortestDistanceIndex];
+            tour = shortestTour; // Assigning to the outer scoped variables
+            totalDistance = shortestTotalDistance; 
+            let shortestAlgorithm = Object.keys(executionTimes)[shortestDistanceIndex];
+            setSelectedAlgorithm(shortestAlgorithm);
+            setTotalDistance(totalDistance/1609.34);
+        } 
+        
+
+      }
       else {
       
       if (selectedAlgo === 'TSP Nearest') {
@@ -211,7 +251,7 @@ const OptimalDeliveryRouteSystem = () => {
       setTourPath(tour);
       setTotalDistance(totalDistance);
       console.log("Tour:", tour);
-      console.log("Total distance:", totalDistance);
+      console.log("Total distance:", totalDistance/1609.34);
 
        // Request directions for the tour path
     if (tour.length >= 2) {
@@ -237,6 +277,13 @@ const OptimalDeliveryRouteSystem = () => {
         (result, status) => {
           if (status === 'OK') {
             setDirections(result.routes[0].overview_path);
+
+            const totalDuration = result.routes[0].legs.reduce(
+              (accumulator, currentLeg) => accumulator + currentLeg.duration.value,
+              0
+            );
+            setSelectedDuration(totalDuration);
+
           } else {
             console.error(`Directions request failed due to ${status}`);
           }
@@ -365,18 +412,29 @@ const OptimalDeliveryRouteSystem = () => {
               <Button onClick={handleRefresh} colorScheme="red">Refresh Page</Button>
             </Flex>
           </form>
+      
           <div className="tourpath"> 
-            <h2> <b>Tour Path:</b></h2>
-            <ul>
-              {tourPath.map((index) => (
-                <li key={index}>{deliveryLocations[index]}</li>
-              ))}
-            </ul>
-          </div>          
+         
+          {selectedAlgorithm && ( 
+            <p><b>Selected Algorithm: </b> {selectedAlgorithm}</p>
+          )}
+          {totalDistance && ( // Display distance only when total distance is available
+          <p><b>Selected Distance:</b> {(totalDistance / 1609.34).toFixed(2)} miles</p>
+          )}
+           {selectedDuration && (
+          <p><b> Estimated Duration: </b> {Math.floor(selectedDuration / 60)} minutes</p>
+          )}
+           <h2> <b>Tour Path:</b></h2>
+          <ul>
+            {tourPath.map((index) => (
+              <li key={index}>{deliveryLocations[index]}</li>
+            ))}
+          </ul>
+        
+      </div>
         </div>
         
         <div className="map">
-          <h1>Google Map</h1>
           <GoogleMap  
           onLoad={map => mapRef.current = map}
           mapContainerStyle={containerStyle} 
