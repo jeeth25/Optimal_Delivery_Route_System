@@ -3,22 +3,8 @@ import { useState, useEffect, useRef} from "react";
 import {solveTSPNearest, solveTSPBruteForce, solveTSPMST} from "./routing_algorithms";
 import { Bar } from 'react-chartjs-2';
 import { CategoryScale, Chart, LinearScale,  BarElement  } from "chart.js";
-import {
-  Box,
-  FormControl,
-  FormLabel,
-  Button,
-  ButtonGroup,
-  Flex,
-  HStack,
-  IconButton,
-  Input,
-  SkeletonText,
-  Text,
-  Select,
-} from "@chakra-ui/react";
-
-import { GoogleMap, useJsApiLoader, Marker, Autocomplete, Polyline, DirectionsService, InfoWindow } from '@react-google-maps/api';
+import { FormControl, FormLabel, Button, Input, Text,} from "@chakra-ui/react";
+import { GoogleMap, useJsApiLoader, Marker, Autocomplete, Polyline} from '@react-google-maps/api';
 
 
 const apiKey = "AIzaSyCaWMTzyu3Whc_NtMtz7ol30tr328A3scM";
@@ -36,13 +22,13 @@ const center = {
   lng: -117.9242
 };
 
-const smallPadding = {
-  padding: "10px 0px 10px 0px",
-}
+// const smallPadding = {
+//   padding: "10px 0px 10px 0px",
+// }
 
-const smallMargin = {
-  margin: "10px 0px 10px 0px",
-}
+// const smallMargin = {
+//   margin: "10px 0px 10px 0px",
+// }
 
 const libraries = ["places"];
 
@@ -59,9 +45,8 @@ const OptimalDeliveryRouteSystem = () => {
   var [totalDistance, setTotalDistance] = useState([]);
   const [directions, setDirections] = useState([]);
   const [markersWithLabels, setMarkersWithLabels] = useState([]);
-  const [selectedMarker, setSelectedMarker] = useState(null);
+  // const [selectedMarker, setSelectedMarker] = useState(null);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState("");
-  const [animationIndex, setAnimationIndex] = useState("");
   const [selectedDuration, setSelectedDuration] = useState("");
   const [executionTimes, setExecutionTimes] = useState({
     'TSP Nearest': 0,
@@ -69,7 +54,8 @@ const OptimalDeliveryRouteSystem = () => {
     'TSPMST': 0,
   });
   
-
+  console.log(markersWithLabels);
+  
   var tour = [];
   
   const selectAlgoRef = useRef();
@@ -217,8 +203,6 @@ const OptimalDeliveryRouteSystem = () => {
           }
         });
 
-        
-
         if (shortestDistanceIndex !== -1)
         {
             // const { tour, totalDistance } = distancesArray[shortestDistanceIndex];
@@ -329,7 +313,10 @@ const OptimalDeliveryRouteSystem = () => {
     );
   });
    
-
+  const handleDefault = () => {
+    const defaultLocation = { lat: 33.8823476, lng: -117.8851033 }; // Set the default location coordinates
+    setMapCenter(defaultLocation); // Set the map center to the default location
+  };
   const handleRefresh = () => {
     window.location.reload();
   };
@@ -357,7 +344,6 @@ const OptimalDeliveryRouteSystem = () => {
     }
   };
 
- 
 
   if(!isLoaded) {
     return <div>Loading...</div>
@@ -365,28 +351,34 @@ const OptimalDeliveryRouteSystem = () => {
   return (
     <div>
       <div className="mainapp">
-        <div className="locations" style={smallMargin}>
+        <div className="locations">
             <Text fontSize="xl" fontWeight="bold">Enter Locations:</Text>
           <form onSubmit={handleAddLocation}>
-            <FormControl style={smallPadding}>
+            <FormControl>
               <FormLabel>Delivery Location:</FormLabel>
               <Autocomplete onLoad={(autocomplete) => setAutocomplete(autocomplete)}
                 onPlaceChanged={handlePlaceChanged}>
               <Input
                 type="text"
                 name="address"
+                style={{width: '280px'}}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 required
               />
               </Autocomplete>
             </FormControl>
+            <div style={{padding: '5px'}}>
             <Button colorScheme="blue" type="submit">
               Add Location
             </Button>
+            <Button colorScheme="green" onClick={handleDefault} style={{marginLeft: "5px"}} >
+              Reset Map
+            </Button> 
+            </div>
           </form>
-      
-          <form style={smallPadding} onSubmit={handleSubmit}>
+
+          <form onSubmit={handleSubmit}>
               <Text fontSize="xl" fontWeight="bold">Delivery Locations:</Text>
               <ul>
                 {deliveryLocations.map((location, index) => (
@@ -396,21 +388,20 @@ const OptimalDeliveryRouteSystem = () => {
 
           </form>
 
-          <form onSubmit={handleSubmit} style={smallPadding} required>
+          <form onSubmit={handleSubmit} required>
             <FormControl>
               <FormLabel fontSize="xl" fontWeight="bold">Select an Algorithm:</FormLabel>
-              <Select ref = {selectAlgoRef} placeholder='Select an Algorithm ' required>
+              <select ref = {selectAlgoRef} style={{width: '280px', padding: '5px', border: '1px solid black', borderRadius:'5px'}} placeholder='Select an Algorithm ' required>
                 <option value='TSP Nearest'>TSP Nearest</option>
                 <option value='TSP Brute Force'>TSP Brute Force</option>
-                <option value='TSPMST'>TSPMST</option>
+                <option value='TSPMST'>TSP MST</option>
                 <option value='All'>All</option>
-              </Select>
+              </select>
             </FormControl>
-
-            <Flex style={smallPadding}>
-              <Button colorScheme="blue" type="submit">Optimize Route</Button>
-              <Button onClick={handleRefresh} colorScheme="red">Refresh Page</Button>
-            </Flex>
+            <div style={{padding: '5px'}}>
+            <Button colorScheme="blue" type="submit">Optimize Route</Button>
+            <Button onClick={handleRefresh} colorScheme="red" style={{marginLeft: '5px'}}>Refresh Page</Button>
+            </div>
           </form>
       
           <div className="tourpath"> 
@@ -474,7 +465,8 @@ const OptimalDeliveryRouteSystem = () => {
         </div>
          
       </div>
-      {selectedAlgorithm === 'All' && (
+      {console.log("Ref:", selectAlgoRef)}
+      {selectAlgoRef.current?.value === 'All' && (
       <div className="graph">
       <Bar
           data={{
