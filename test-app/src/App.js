@@ -397,11 +397,21 @@ const OptimalDeliveryRouteSystem = () => {
             <Text fontSize="xl" fontWeight="bold">
               Delivery Locations:
             </Text>
-            <ul>
-              {deliveryLocations.map((location, index) => (
-                <li key={index}>{location}</li>
-              ))}
-            </ul>
+            {deliveryLocations.length > 0 ? (
+              <div className="delivery-box" style={{ borderColor: "darkgray", borderWidth: "1px", borderStyle: "solid" }}>
+                <ul>
+                  {deliveryLocations.map((location, index) => (
+                    <li key={index}>{location}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <ul>
+                {deliveryLocations.map((location, index) => (
+                  <li key={index}>{location}</li>
+                ))}
+              </ul>
+            )}
           </form>
 
           <form onSubmit={handleSubmit} required>
@@ -458,15 +468,26 @@ const OptimalDeliveryRouteSystem = () => {
                 minutes
               </p>
             )}
-            <h2>
-              {" "}
-              <b>Tour Path:</b>
-            </h2>
-            <ul>
-              {tourPath.map((index) => (
-                <li key={index}>{deliveryLocations[index]}</li>
-              ))}
-            </ul>
+            <form>
+              <Text fontSize="xl" fontWeight="bold">
+                Tour Path:
+              </Text>
+              {tourPath.length > 0 ? (
+                <div className="delivery-box"style={{ borderColor: "darkgray", borderWidth: "1px", borderStyle: "solid" }}>
+                  <ul>
+                    {tourPath.map((index) => (
+                      <li key={index}>{deliveryLocations[index]}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <ul>
+                  {tourPath.map((index) => (
+                    <li key={index}>{deliveryLocations[index]}</li>
+                  ))}
+                </ul>
+              )}
+            </form>
           </div>
         </div>
 

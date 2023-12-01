@@ -23,7 +23,11 @@
   font-size: calc(10px + 2vmin);
   color: white;
 }
-
+.delivery-box {
+  border: 1px solid #000;
+  padding: 10px;
+  width: 300px;
+ }
 .App-link {
   color: #61dafb;
 }
