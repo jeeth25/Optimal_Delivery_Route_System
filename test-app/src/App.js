@@ -1,7 +1,8 @@
 import "./App.css";
 import { useState, useEffect, useRef} from "react";
 import {solveTSPNearest, solveTSPBruteForce, solveTSPMST} from "./routing_algorithms";
-
+import { Bar } from 'react-chartjs-2';
+import { CategoryScale, Chart, LinearScale,  BarElement  } from "chart.js";
 import {
   Box,
   FormControl,
@@ -21,6 +22,8 @@ import { GoogleMap, useJsApiLoader, Marker, Autocomplete, Polyline, DirectionsSe
 
 
 const apiKey = "AIzaSyCaWMTzyu3Whc_NtMtz7ol30tr328A3scM";
+
+Chart.register(CategoryScale, LinearScale, BarElement);
 
 const containerStyle = {
     width: '100%',
@@ -57,9 +60,18 @@ const OptimalDeliveryRouteSystem = () => {
   const [directions, setDirections] = useState([]);
   const [markersWithLabels, setMarkersWithLabels] = useState([]);
   const [selectedMarker, setSelectedMarker] = useState(null);
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState("");
+  const [animationIndex, setAnimationIndex] = useState("");
+  const [executionTimes, setExecutionTimes] = useState({
+    'TSP Nearest': 0,
+    'TSP Brute Force': 0,
+    'TSPMST': 0,
+  });
+
   var tour = [];
   const selectAlgoRef = useRef();
   var selectedAlgo = null;
+  const mapRef = useRef();
 
   useEffect(() => {
     if (markers.length > 0) {
@@ -68,6 +80,16 @@ const OptimalDeliveryRouteSystem = () => {
     }
   }, [markers]);
 
+  useEffect(() => {
+    if (directions.length > 0 && mapRef.current) {
+      const bounds = new window.google.maps.LatLngBounds();
+      directions.forEach(point => {
+        bounds.extend(new window.google.maps.LatLng(point.lat(), point.lng()));
+      });
+      mapRef.current.fitBounds(bounds);
+    }
+  }, [directions]);
+  
   const handleAddLocation = (e) => {
     e.preventDefault();
 
@@ -76,6 +98,8 @@ const OptimalDeliveryRouteSystem = () => {
       return; // Prevent adding invalid address to the list
   
     }
+
+    const isInitialMarker = markers.length === 0; // Check if this is the first marker
 
     setDeliveryLocations([...deliveryLocations, address]);
     setAddress("");
@@ -90,6 +114,7 @@ const OptimalDeliveryRouteSystem = () => {
           {
             lat: place.geometry.location.lat(),
             lng: place.geometry.location.lng(),
+            isInitial: isInitialMarker,
           },
         ];
         setMarkers(newMarkers);
@@ -104,14 +129,15 @@ const OptimalDeliveryRouteSystem = () => {
       }
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const handleSelectAlgorithm = () => {
       selectedAlgo = selectAlgoRef.current.value;
+      setSelectedAlgorithm(selectedAlgo); // Update the selectedAlgorithm state variable
     }
-
+    
     const calculateDistances = async () => {
   
       const distances = [];
@@ -146,13 +172,42 @@ const OptimalDeliveryRouteSystem = () => {
   
 
       handleSelectAlgorithm();
-      if (selectedAlgo === "TSP Nearest"){
+
+      if (selectedAlgo === 'All') {
+        const start1 = performance.now();
         ({ tour, totalDistance } = solveTSPNearest(distances));
-      }else if (selectedAlgo === "TSP Brute Force"){
+        const end1 = performance.now();
+    
+        const start2 = performance.now();
         ({ tour, totalDistance } = solveTSPBruteForce(distances));
-      }else if(selectedAlgo === "TSPMST"){
+        const end2 = performance.now();
+    
+        const start3 = performance.now();
         ({ tour, totalDistance } = solveTSPMST(distances));
+        const end3 = performance.now();
+    
+        setExecutionTimes({
+          algorithm1: end1 - start1,
+          algorithm2: end2 - start2,
+          algorithm3: end3 - start3,
+        });
+      } 
+      else {
+      
+      if (selectedAlgo === 'TSP Nearest') {
+       
+          ({ tour, totalDistance } = solveTSPNearest(distances));
+
+      } else if (selectedAlgo === 'TSP Brute Force') {
+        
+          ({ tour, totalDistance } = solveTSPBruteForce(distances));
+
+      } else if (selectedAlgo === 'TSPMST') {
+ 
+          ({ tour, totalDistance } = solveTSPMST(distances));
+
       }
+    }
       setTourPath(tour);
       setTotalDistance(totalDistance);
       console.log("Tour:", tour);
@@ -191,11 +246,13 @@ const OptimalDeliveryRouteSystem = () => {
     const labeledMarkers = tour.map((cityIndex, index) => {
       const city = cities[cityIndex];
       const markerLabel = index === 0 ? 'Start' : (index + 1).toString(); // Label for markers
-
+      const tourNumber = index + 1; // Tour number for the location
+    
       return {
         position: { lat: city.lat, lng: city.lng },
         label: markerLabel,
-        title: city.name // Title for InfoWindow (city name)
+        title: `Location: ${city.lat}, ${city.lng}`, // Title for InfoWindow (location coordinates)
+        tourNumber: tourNumber, // Tour number for the location
       };
     });
 
@@ -295,10 +352,11 @@ const OptimalDeliveryRouteSystem = () => {
           <form onSubmit={handleSubmit} style={smallPadding} required>
             <FormControl>
               <FormLabel fontSize="xl" fontWeight="bold">Select an Algorithm:</FormLabel>
-              <Select ref = {selectAlgoRef} placeholder='Select an Algorithm: ' required>
+              <Select ref = {selectAlgoRef} placeholder='Select an Algorithm ' required>
                 <option value='TSP Nearest'>TSP Nearest</option>
                 <option value='TSP Brute Force'>TSP Brute Force</option>
                 <option value='TSPMST'>TSPMST</option>
+                <option value='All'>All</option>
               </Select>
             </FormControl>
 
@@ -307,20 +365,42 @@ const OptimalDeliveryRouteSystem = () => {
               <Button onClick={handleRefresh} colorScheme="red">Refresh Page</Button>
             </Flex>
           </form>
-
+          <div className="tourpath"> 
+            <h2> <b>Tour Path:</b></h2>
+            <ul>
+              {tourPath.map((index) => (
+                <li key={index}>{deliveryLocations[index]}</li>
+              ))}
+            </ul>
+          </div>          
         </div>
         
         <div className="map">
           <h1>Google Map</h1>
           <GoogleMap  
+          onLoad={map => mapRef.current = map}
           mapContainerStyle={containerStyle} 
           center={mapCenter} 
           zoom={15}>
 
           {markers.map((marker, index) => (
-              <Marker key={index} position={{ lat: marker.lat, lng: marker.lng }} />
-            ))}  
-      
+            <Marker
+              key={index}
+              position={{ lat: marker.lat, lng: marker.lng }}
+              options={{
+                icon: {
+                  path: window.google.maps.SymbolPath.CIRCLE,
+                  scale: 7,
+                  fillColor: marker.isInitial ? 'green' : 'red', // Set marker color based on isInitial flag
+                  fillOpacity: 1,
+                  strokeColor: 'black',
+                  strokeWeight: 2,
+                },
+              }}
+            />
+          ))}
+           
+
             {directions.length > 0 && (
             <Polyline
               path={directions.map(point => ({ lat: point.lat(), lng: point.lng() }))}
@@ -332,8 +412,50 @@ const OptimalDeliveryRouteSystem = () => {
             />
           )}
           </GoogleMap>
+         
         </div>
+         
       </div>
+      {selectedAlgorithm === 'All' && (
+      <div className="graph">
+      <Bar
+          data={{
+            labels: ['Nearest Neighbor', 'TSP BruteForce', 'TSPMST'],
+            datasets: [{
+              label: 'Execution Time (ms)',
+              data: [executionTimes.algorithm1, executionTimes.algorithm2, executionTimes.algorithm3],
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+              ],
+              borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+              ],
+              borderWidth: 1,
+            }],
+          }}
+          options={{
+            indexAxis: 'x',
+            plugins: {
+              legend: {
+                display: true,
+              },
+            },
+            scales: {
+              x: { 
+                beginAtZero: true,
+              },
+              y: {
+                beginAtZero: true,
+              },
+            },
+          }}
+        />
+      </div>
+      )}
     </div>
   );
 };
