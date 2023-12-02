@@ -32,12 +32,12 @@ export const solveTSPNearest = (distances) => {
         visited[currentCity] = true;
         totalDistance += nearestDistance;
       } else {
-        // Handle the case where there's no valid nearest city
+        
         break;
       }
     }
 
-    // Complete the tour by returning to the starting city
+    // Completing the tour by returning to the starting city
     tour.push(0);
     totalDistance += distances[currentCity][0] !== undefined ? distances[currentCity][0] : 0;
 
@@ -61,33 +61,17 @@ export const solveTSPNearest = (distances) => {
 
     return { tour: optimalTour, totalDistance: minDistance };
 }
-//   export function solveTSPBruteForce(distances) {
-//     const numCities = distances.length;
-//     const allPermutations = generateAllPermutations(numCities);
-//     let minDistance = Infinity;
-//     let optimalTour;
 
-//     for (const permutation of allPermutations) {
-//         const currentDistance = calculateTourDistance(permutation, distances);
-//         if (currentDistance < minDistance) {
-//             minDistance = currentDistance;
-//             optimalTour = permutation;
-//         }
-//     }
-
-//     return { tour: optimalTour, totalDistance: minDistance };
-// }
 
  export function solveTSPMST(distances) {
-    // const numCities = distances.length;
-
-    // Create a minimum spanning tree using Prim's algorithm
+    
+    // Creating a minimum spanning tree using Prim's algorithm
     const mst = primMST(distances);
 
-    // Perform a Depth-First Search (DFS) on the MST to get a tour
+    // Performed a Depth-First Search (DFS) on the MST to get a tour
     const tour = dfsOnMST(mst);
 
-    // Calculate the total distance of the tour
+    // Calculating the total distance of the tour
     const totalDistance = calculateTourDistance(tour, distances);
 
     return { tour, totalDistance };

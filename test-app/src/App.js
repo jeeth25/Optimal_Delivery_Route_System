@@ -92,7 +92,7 @@ const OptimalDeliveryRouteSystem = () => {
     e.preventDefault();
 
     console.log(e.target.value)
-    // if(e.target.value === "") return
+    
     if (!isValidInput) {
       console.log("Invalid address");
       return; // Prevent adding invalid address to the list
@@ -137,14 +137,14 @@ const OptimalDeliveryRouteSystem = () => {
 
     const handleSelectAlgorithm = () => {
       selectedAlgo = selectAlgoRef.current.value;
-      setSelectedAlgorithm(selectedAlgo); // Update the selectedAlgorithm state variable
+      setSelectedAlgorithm(selectedAlgo); 
     };
 
     const calculateDistances = async () => {
       const distances = [];
       const service = new window.google.maps.DistanceMatrixService();
 
-      // Calculate distances between pairs of coordinates using Google Maps API
+      // Calculating distances between pairs of coordinates using Google Maps API
       for (let i = 0; i < cities.length; i++) {
         const origins = { lat: cities[i].lat, lng: cities[i].lng };
         const rowDistances = [];
@@ -170,10 +170,9 @@ const OptimalDeliveryRouteSystem = () => {
         distances.push(rowDistances);
       }
 
-      // Generate the distance matrix
+      // Generating the distance matrix
       console.log("Distance Matrix:", distances);
-      // Use the generated distance matrix for further processing
-      // For instance, you can update state or perform additional operations
+      
 
       handleSelectAlgorithm();
 
@@ -194,14 +193,14 @@ const OptimalDeliveryRouteSystem = () => {
           solveTSPMST(distances);
         const end3 = performance.now();
 
-        // Store execution times for all algorithms
+        // Storing execution times for all algorithms
         setExecutionTimes({
           "TSP Nearest": end1 - start1,
           "TSP Brute Force": end2 - start2,
           "TSP MST": end3 - start3,
         });
 
-        // Store distances of all algorithms
+        // Storing distances of all algorithms
         const distancesArray = [
           { tour: tourNearest, totalDistance: totalDistanceNearest },
           { tour: tourBruteForce, totalDistance: totalDistanceBruteForce },
@@ -269,7 +268,7 @@ const OptimalDeliveryRouteSystem = () => {
             destination: destination,
             waypoints: waypoints,
             optimizeWaypoints: true,
-            travelMode: "DRIVING", // Change this according to your use case
+            travelMode: "DRIVING", // Driving mode
           },
           (result, status) => {
             if (status === "OK") {
@@ -295,12 +294,12 @@ const OptimalDeliveryRouteSystem = () => {
         return {
           position: { lat: city.lat, lng: city.lng },
           label: markerLabel,
-          title: `Location: ${city.lat}, ${city.lng}`, // Title for InfoWindow (location coordinates)
-          tourNumber: tourNumber, // Tour number for the location
+          title: `Location: ${city.lat}, ${city.lng}`, 
+          tourNumber: tourNumber, 
         };
       });
 
-      // Set the markers with labels in state
+
       setMarkersWithLabels(labeledMarkers);
     };
 
