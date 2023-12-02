@@ -15,6 +15,7 @@ import {
   Autocomplete,
   Polyline,
 } from "@react-google-maps/api";
+import YourReactComponent from "./Landing";
 
 const apiKey = "AIzaSyCaWMTzyu3Whc_NtMtz7ol30tr328A3scM";
 
@@ -41,6 +42,7 @@ const center = {
 const libraries = ["places"];
 
 const OptimalDeliveryRouteSystem = () => {
+  const [landingPage, setLandingPage] = useState(true);
   const [deliveryLocations, setDeliveryLocations] = useState([]);
   const [address, setAddress] = useState("");
   const [autocomplete, setAutocomplete] = useState(null);
@@ -89,6 +91,8 @@ const OptimalDeliveryRouteSystem = () => {
   const handleAddLocation = (e) => {
     e.preventDefault();
 
+    console.log(e.target.value)
+    // if(e.target.value === "") return
     if (!isValidInput) {
       console.log("Invalid address");
       return; // Prevent adding invalid address to the list
@@ -355,125 +359,139 @@ const OptimalDeliveryRouteSystem = () => {
     return <div>Loading...</div>;
   }
   return (
-    <div>
-      <div className="mainapp">
-        <div className="locations">
-          <Text fontSize="xl" fontWeight="bold">
-            Enter Locations:
-          </Text>
-          {/* <form onSubmit={handleAddLocation}> */}
-          <form>
-            <FormControl>
-              <FormLabel>Delivery Location:</FormLabel>
-              <Autocomplete
-                onLoad={(autocomplete) => setAutocomplete(autocomplete)}
-                onPlaceChanged={handlePlaceChanged}
-              >
-                <Input
-                  type="text"
-                  name="address"
-                  style={{ width: "280px" }}
-                  value={address} 
-                  onChange={(e) => setAddress(e.target.value)}
-                  required
-                />
-              </Autocomplete>
-            </FormControl>
-            <div style={{ padding: "5px" }}>
-              <Button colorScheme="blue" onClick={(e) => handleAddLocation(e)}>
-                Add Location
-              </Button>
-              <Button
-                colorScheme="green"
-                onClick={handleDefault}
-                style={{ marginLeft: "5px" }}
-              >
-                Reset Map
-              </Button>
-            </div>
-          </form>
+    <>
+      {landingPage ? (
+        <YourReactComponent setLandingPage={setLandingPage}/>
+      ) : (
+        <div>
+          <div className="mainapp">
+            <div className="locations">
+              <Text fontSize="xl" fontWeight="bold">
+                Enter Locations:
+              </Text>
+              <form onSubmit={handleAddLocation}>
+              {/* <form> */}
+                <FormControl>
+                  <FormLabel>Delivery Location:</FormLabel>
+                  <Autocomplete
+                    onLoad={(autocomplete) => setAutocomplete(autocomplete)}
+                    onPlaceChanged={handlePlaceChanged}
+                  >
+                    <Input
+                      type="text"
+                      name="address"
+                      style={{ width: "280px" }}
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      required
+                      />
+                  </Autocomplete>
+                </FormControl>
+                <div style={{ padding: "5px" }}>
+                  <Button
+                    colorScheme="blue"
+                    onClick={(e) => handleAddLocation(e)}
+                  >
+                    Add Location
+                  </Button>
+                  <Button
+                    colorScheme="green"
+                    onClick={handleDefault}
+                    style={{ marginLeft: "5px" }}
+                  >
+                    Reset Map
+                  </Button>
+                </div>
+              </form>
 
-          <form>
-            <Text fontSize="xl" fontWeight="bold">
-              Delivery Locations:
-            </Text>
-            {deliveryLocations.length > 0 ? (
-              <div className="delivery-box" style={{ borderColor: "darkgray", borderWidth: "1px", borderStyle: "solid" }}>
-                <ul>
-                  {deliveryLocations.map((location, index) => (
-                    <li key={index}>{location}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <ul>
-                {deliveryLocations.map((location, index) => (
-                  <li key={index}>{location}</li>
-                ))}
-              </ul>
-            )}
-            {/* <ul>
+              <form>
+                <Text fontSize="xl" fontWeight="bold">
+                  Delivery Locations:
+                </Text>
+                {deliveryLocations.length > 0 ? (
+                  <div
+                    className="delivery-box"
+                    style={{
+                      borderColor: "darkgray",
+                      borderWidth: "1px",
+                      borderStyle: "solid",
+                    }}
+                  >
+                    <ul>
+                      {deliveryLocations.map((location, index) => (
+                        <li key={index}>{location}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <ul>
+                    {deliveryLocations.map((location, index) => (
+                      <li key={index}>{location}</li>
+                    ))}
+                  </ul>
+                )}
+                {/* <ul>
               {deliveryLocations.map((location, index) => (
                 <li key={index}>{location}</li>
               ))}
             </ul> */}
-          </form>
+              </form>
 
-          <form onSubmit={handleSubmit} required>
-            <FormControl>
-              <FormLabel fontSize="xl" fontWeight="bold">
-                Select an Algorithm:
-              </FormLabel>
-              <select
-                ref={selectAlgoRef}
-                style={{
-                  width: "280px",
-                  padding: "5px",
-                  border: "1px solid black",
-                  borderRadius: "5px",
-                }}
-                placeholder="Select an Algorithm "
-                required
-              >
-                <option value="TSP Nearest">TSP Nearest</option>
-                <option value="TSP Brute Force">TSP Brute Force</option>
-                <option value="TSPMST">TSP MST</option>
-                <option value="All">All</option>
-              </select>
-            </FormControl>
-            <div style={{ padding: "5px" }}>
-              <Button colorScheme="blue" type="submit">
-                Optimize Route
-              </Button>
-              <Button
-                onClick={handleRefresh}
-                colorScheme="red"
-                style={{ marginLeft: "5px" }}
-              >
-                Refresh Page
-              </Button>
-            </div>
-          </form>
+              <form onSubmit={handleSubmit} required>
+                <FormControl>
+                  <FormLabel fontSize="xl" fontWeight="bold">
+                    Select an Algorithm:
+                  </FormLabel>
+                  <select
+                    ref={selectAlgoRef}
+                    style={{
+                      width: "280px",
+                      padding: "5px",
+                      border: "1px solid black",
+                      borderRadius: "5px",
+                    }}
+                    placeholder="Select an Algorithm "
+                    required
+                  >
+                    <option value="TSP Nearest">TSP Nearest</option>
+                    <option value="TSP Brute Force">TSP Brute Force</option>
+                    <option value="TSPMST">TSP MST</option>
+                    <option value="All">All</option>
+                  </select>
+                </FormControl>
+                <div style={{ padding: "5px" }}>
+                  <Button colorScheme="blue" type="submit">
+                    Optimize Route
+                  </Button>
+                  <Button
+                    onClick={handleRefresh}
+                    colorScheme="red"
+                    style={{ marginLeft: "5px" }}
+                  >
+                    Refresh Page
+                  </Button>
+                </div>
+              </form>
 
-          <div className="tourpath">
-            {selectedAlgorithm && (
-              <p>
-                <b>Selected Algorithm: </b> {selectedAlgorithm}
-              </p>
-            )}
-            {totalDistance && ( // Display distance only when total distance is available
-              <p>
-                <b>Selected Distance:</b> {(totalDistance / 1609.34).toFixed(2)}{" "}
-                miles
-              </p>
-            )}
-            {selectedDuration && (
-              <p>
-                <b> Estimated Duration: </b> {Math.floor(selectedDuration / 60)}{" "}
-                minutes
-              </p>
-            )}
-            {/* <h2>
+              <div className="tourpath">
+                {selectedAlgorithm && (
+                  <p>
+                    <b>Selected Algorithm: </b> {selectedAlgorithm}
+                  </p>
+                )}
+                {totalDistance && ( // Display distance only when total distance is available
+                  <p>
+                    <b>Selected Distance:</b>{" "}
+                    {(totalDistance / 1609.34).toFixed(2)} miles
+                  </p>
+                )}
+                {selectedDuration && (
+                  <p>
+                    <b> Estimated Duration: </b>{" "}
+                    {Math.floor(selectedDuration / 60)} minutes
+                  </p>
+                )}
+                {/* <h2>
               {" "}
               <b>Tour Path:</b>
             </h2>
@@ -482,118 +500,126 @@ const OptimalDeliveryRouteSystem = () => {
                 <li key={index}>{deliveryLocations[index]}</li>
               ))}
             </ul> */}
-            <form>
-              <Text fontSize="xl" fontWeight="bold">
-                Tour Path:
-              </Text>
-              {tourPath.length > 0 ? (
-                <div className="delivery-box"style={{ borderColor: "darkgray", borderWidth: "1px", borderStyle: "solid" }}>
-                  <ul>
-                    {tourPath.map((index) => (
-                      <li key={index}>{deliveryLocations[index]}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <ul>
-                  {tourPath.map((index) => (
-                    <li key={index}>{deliveryLocations[index]}</li>
-                  ))}
-                </ul>
-              )}
-            </form>
+                <form>
+                  <Text fontSize="xl" fontWeight="bold">
+                    Tour Path:
+                  </Text>
+                  {tourPath.length > 0 ? (
+                    <div
+                      className="delivery-box"
+                      style={{
+                        borderColor: "darkgray",
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                      }}
+                    >
+                      <ul>
+                        {tourPath.map((index) => (
+                          <li key={index}>{deliveryLocations[index]}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <ul>
+                      {tourPath.map((index) => (
+                        <li key={index}>{deliveryLocations[index]}</li>
+                      ))}
+                    </ul>
+                  )}
+                </form>
+              </div>
+            </div>
 
+            <div className="map">
+              <GoogleMap
+                onLoad={(map) => (mapRef.current = map)}
+                mapContainerStyle={containerStyle}
+                center={mapCenter}
+                zoom={15}
+              >
+                {markers.map((marker, index) => (
+                  <Marker
+                    key={index}
+                    position={{ lat: marker.lat, lng: marker.lng }}
+                    options={{
+                      icon: {
+                        path: window.google.maps.SymbolPath.CIRCLE,
+                        scale: 7,
+                        fillColor: marker.isInitial ? "green" : "red", // Set marker color based on isInitial flag
+                        fillOpacity: 1,
+                        strokeColor: "black",
+                        strokeWeight: 2,
+                      },
+                    }}
+                  />
+                ))}
+
+                {directions.length > 0 && (
+                  <Polyline
+                    path={directions.map((point) => ({
+                      lat: point.lat(),
+                      lng: point.lng(),
+                    }))}
+                    options={{
+                      strokeColor: "#0000FF", // Blue color
+                      strokeOpacity: 0.8,
+                      strokeWeight: 4,
+                    }}
+                  />
+                )}
+              </GoogleMap>
+            </div>
           </div>
-        </div>
-
-        <div className="map">
-          <GoogleMap
-            onLoad={(map) => (mapRef.current = map)}
-            mapContainerStyle={containerStyle}
-            center={mapCenter}
-            zoom={15}
-          >
-            {markers.map((marker, index) => (
-              <Marker
-                key={index}
-                position={{ lat: marker.lat, lng: marker.lng }}
+          {console.log("Ref:", selectAlgoRef)}
+          {selectAlgoRef.current?.value === "All" && (
+            <div className="graph">
+              <Bar
+                data={{
+                  labels: ["Nearest Neighbor", "TSP BruteForce", "TSPMST"],
+                  datasets: [
+                    {
+                      label: "Execution Time (ms)",
+                      data: [
+                        executionTimes["TSP Nearest"],
+                        executionTimes["TSP Brute Force"],
+                        executionTimes["TSP MST"],
+                      ],
+                      backgroundColor: [
+                        "rgba(255, 99, 132, 0.2)",
+                        "rgba(54, 162, 235, 0.2)",
+                        "rgba(0, 100, 0, 0.2)",
+                      ],
+                      borderColor: [
+                        "rgba(255, 99, 132, 1)",
+                        "rgba(54, 162, 235, 1)",
+                        "rgba(0, 100, 0, 1)",
+                      ],
+                      borderWidth: 1,
+                    },
+                  ],
+                }}
                 options={{
-                  icon: {
-                    path: window.google.maps.SymbolPath.CIRCLE,
-                    scale: 7,
-                    fillColor: marker.isInitial ? "green" : "red", // Set marker color based on isInitial flag
-                    fillOpacity: 1,
-                    strokeColor: "black",
-                    strokeWeight: 2,
+                  indexAxis: "x",
+                  plugins: {
+                    legend: {
+                      display: true,
+                    },
+                  },
+                  scales: {
+                    x: {
+                      beginAtZero: true,
+                    },
+                    y: {
+                      beginAtZero: true,
+                    },
                   },
                 }}
               />
-            ))}
-
-            {directions.length > 0 && (
-              <Polyline
-                path={directions.map((point) => ({
-                  lat: point.lat(),
-                  lng: point.lng(),
-                }))}
-                options={{
-                  strokeColor: "#0000FF", // Blue color
-                  strokeOpacity: 0.8,
-                  strokeWeight: 4,
-                }}
-              />
-            )}
-          </GoogleMap>
-        </div>
-      </div>
-      {console.log("Ref:", selectAlgoRef)}
-      {selectAlgoRef.current?.value === "All" && (
-        <div className="graph">
-          <Bar
-            data={{
-              labels: ["Nearest Neighbor", "TSP BruteForce", "TSPMST"],
-              datasets: [
-                {
-                  label: "Execution Time (ms)",
-                  data: [
-                    executionTimes["TSP Nearest"],
-                    executionTimes["TSP Brute Force"],
-                    executionTimes["TSP MST"],
-                  ],
-                  backgroundColor: [
-                    "rgba(255, 99, 132, 0.2)",
-                    "rgba(54, 162, 235, 0.2)",
-                    "rgba(0, 100, 0, 0.2)", 
-                  ],
-                  borderColor: [
-                    "rgba(255, 99, 132, 1)",
-                    "rgba(54, 162, 235, 1)",
-                    "rgba(0, 100, 0, 1)", 
-                  ],
-                  borderWidth: 1,
-                },
-              ],
-            }}
-            options={{
-              indexAxis: "x",
-              plugins: {
-                legend: {
-                  display: true,
-                },
-              },
-              scales: {
-                x: {
-                  beginAtZero: true,
-                },
-                y: {
-                  beginAtZero: true,
-                },
-              },
-            }}
-          />
+            </div>
+          )}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

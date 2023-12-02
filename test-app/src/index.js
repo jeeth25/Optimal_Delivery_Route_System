@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import OptimalDeliveryRouteSystem from './App';
 // import MapComponent from './Components/Map';
-import { ChakraProvider } from '@chakra-ui/react'
+import { ChakraProvider } from '@chakra-ui/react';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
