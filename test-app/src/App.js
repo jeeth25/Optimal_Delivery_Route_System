@@ -17,7 +17,7 @@ import {
 } from "@react-google-maps/api";
 import YourReactComponent from "./Landing";
 
-const apiKey = "AIzaSyCaWMTzyu3Whc_NtMtz7ol30tr328A3scM";
+const apiKey = "YOUR_API_KEY";
 
 Chart.register(CategoryScale, LinearScale, BarElement);
 
